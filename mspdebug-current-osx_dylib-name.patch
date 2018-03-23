@@ -1,0 +1,12 @@
+--- mspdebug/drivers/tilib_api.c.~1~	2018-03-23 14:32:56.000000000 +0900
++++ mspdebug/drivers/tilib_api.c	2018-03-23 14:52:57.000000000 +0900
+@@ -28,6 +28,9 @@
+ #if defined(__Windows__) || defined(__CYGWIN__)
+ static const char tilib_filename[] = "MSP430.DLL";
+ #define TIDLL __stdcall
++#elif defined(__APPLE__)
++static const char tilib_filename[] = "libmsp430.dylib";
++#define TIDLL
+ #else
+ static const char tilib_filename[] = "libmsp430.so";
+ #define TIDLL

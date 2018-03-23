@@ -14,6 +14,12 @@ class MspdebugHead < Formula
     url "https://raw.githubusercontent.com/tgtakaoka/scripts-msp430/mspgcc4/mspdebug-enhance_dis_lowercase.patch"
     sha256 "97754e4f844e13cfc14777a5493f5776863a2fac863dbe650882c02372311321"
   end
+  if OS.mac?
+     patch do
+       url "https://raw.githubusercontent.com/tgtakaoka/homebrew-tinyos-msp430/master/mspdebug-current-osx_dylib-name.patch"
+       sha256 "fa8feea59f7e21217634f1093b2f6aca52be45b29646c1411ba10e48808da906"
+     end
+  end
 
   def install
     ENV.append_to_cflags "-I#{Formula["hidapi"].opt_include}/hidapi" if OS.mac?
