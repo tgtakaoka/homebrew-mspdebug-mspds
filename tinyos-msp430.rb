@@ -5,9 +5,6 @@ class TinyosMsp430 < Formula
 
   depends_on "tinyos-main" => :head
   depends_on "tinyos-tools" => :head
-  depends_on "libc-msp430"
-  depends_on "gcc-msp430-elf"
-  depends_on "mspdebug-head" => :head
 
   def install
     dest = (prefix/"source")
