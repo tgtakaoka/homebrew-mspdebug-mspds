@@ -3,7 +3,7 @@ homebrew-tinyos-msp430
 
 The [Homebrew][] formulae of [TinyOS for small MSP430 chips][].  This
 repository includes `nesc-gcc`, `tinyos-tools`, `tinyos-main`,
-`tinyos-msp430`.
+`tinyos-msp430`, `mspdebug-head`.
 
 To get everything, execute the following commands.
 
@@ -16,6 +16,7 @@ Version:
     tinyos-tools-HEAD
     tinyos-main-HEAD (branch msp430-elf)
     tinyos-msp430-HEAD
+    mspdebug-HEAD
 
 [Homebrew]: https://brew.sh/
 [TinyOS for small MSP430 chips]: https://github.com/tgtakaoka/tinyos-msp430
