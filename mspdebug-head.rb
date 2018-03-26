@@ -5,7 +5,7 @@ class MspdebugHead < Formula
 
   depends_on "hidapi" if OS.mac?
   depends_on "libusb-compat" if OS.mac?
-  depends_on "msp-ds"
+#  depends_on "msp-ds"
 
   patch do
     url "https://raw.githubusercontent.com/tgtakaoka/homebrew-tinyos-msp430/master/patches/mspdebug-head-patches.tar.xz"
