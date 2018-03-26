@@ -21,14 +21,13 @@ class MspDs < Formula
       # Make hid-libusb.o
       linux_dir = "ThirdParty/hidapi-hidapi-0.8.0-rc1/linux"
       Dir.chdir linux_dir do
-        inreplace "Makefile-manual", "hid.o", "hid-libusb.o"
-        FileUtils.cp "hid.c", "hid-libusb.c"
-        system "make", "-f", "Makefile-manual"
+        system "make", "-f", "Makefile-manual", "hid.o"
+        FileUtils.cp "hid.o", buildpath/"ThirdParty/lib64/hid-libusb.o"
       end
-      (buildpath/"ThirdParty/lib64").install "#{linux_dir}/hid-libusb.o"
 
       suffix = ".so"
       hidapi_h = "/usr/include/hidapi/hidapi.h"
+      inreplace "Makefile", "-lusb-1.0", "-ludev"
     end
     if OS.mac?
       suffix = ".dylib"
