@@ -27,11 +27,22 @@ class MspdebugHead < Formula
     system "make", "PREFIX=#{prefix}", "install"
   end
 
-  def caveats; <<~EOS
-    You may need to install a kernel extension if you're having trouble with
-    RF2500-like devices such as the TI Launchpad:
-      https://dlbeer.co.nz/mspdebug/faq.html#rf2500_osx
-    EOS
+  def caveats
+    if OS.mac?
+      <<~EOS
+          You may want to add the following path to load libmsp430.dylib.
+            $ export DYLD_FALLBACK_LIBRARY_PATH=$(brew --prefix)/lib
+          You may need to install a kernel extension if you're having trouble with
+          RF2500-like devices such as the TI Launchpad:
+          https://dlbeer.co.nz/mspdebug/faq.html#rf2500_osx
+      EOS
+    elsif OS.linux?
+      <<~EOS
+          You may want to set group and mode of msdebug by
+            $ sudo chgrp serial $(brew --prefix mspdebug-head)/bin/mspdebug
+            $ sudo chmod g+s $(brew --prefix mspdebug-head)/bin/mspdebug
+      EOS
+    end
   end
 
   test do
