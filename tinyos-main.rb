@@ -1,7 +1,7 @@
 class TinyosMain < Formula
   desc "TinyOS source"
   homepage "http://tinyos.net"
-  head "https://github.com/tgtakaoka/tinyos-main.git", :branch => "msp430-elf"
+  head "https://github.com/tgtakaoka/tinyos-main.git", :branch => "msp430-elf", :shallow => false
 
   def install
     dest = (prefix/"source")

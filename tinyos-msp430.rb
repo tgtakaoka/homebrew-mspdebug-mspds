@@ -1,7 +1,7 @@
 class TinyosMsp430 < Formula
   desc "TinyOS source for small MSP430"
   homepage "http://github.com/tgtakaoka/tinyos-msp430"
-  head "https://github.com/tgtakaoka/tinyos-msp430.git", :branch => "master"
+  head "https://github.com/tgtakaoka/tinyos-msp430.git", :branch => "master", :shallow => false
 
   depends_on "tinyos-main" => :head
   depends_on "tinyos-tools" => :head
