@@ -2,7 +2,7 @@ class MspDs < Formula
   desc "MSP Debug Stack Open Source Package"
   homepage "http://www.ti.com/tool/mspds"
   url "http://www.ti.com/lit/sw/slac460x/slac460x.zip"
-  version "slac460x-1"
+  version "slac460x-2"
   sha256 "c6bf24338b50f6ce8f6f0127ec2673e10add251e0a89e894fd30897eaa4e0cbc"
 
   depends_on "hidapi" if OS.mac?
@@ -10,8 +10,8 @@ class MspDs < Formula
   depends_on "boost" if OS.mac?
 
   patch do
-    url "https://raw.githubusercontent.com/tgtakaoka/homebrew-tinyos-msp430/master/patches/msp-ds-slac460x-1-patches.tar.xz"
-    sha256 "ccb38ea979d5782a9c6d9a74094347a6ab2fc2f094ca02d9afecd12232339098"
+    url "https://raw.githubusercontent.com/tgtakaoka/homebrew-tinyos-msp430/master/patches/msp-ds-slac460x-2-patches.tar.xz"
+    sha256 "601abcd99e3376953dd9cbf1d70c734dd2906ea6ade5d7888083f1e527e36803"
     apply "msp-ds-slac460x-boost.patch"
     apply "msp-ds-slac460x-dumpdb.patch"
   end
@@ -39,7 +39,9 @@ class MspDs < Formula
     (buildpath/"ThirdParty/include").install_symlink hidapi_h
 
     system "make", *args
+    system "make", "msp-ds-dumpdb"
 
     lib.install "libmsp430#{suffix}"
+    bin.install "msp-ds-dumpdb"
   end
 end
