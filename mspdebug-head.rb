@@ -7,21 +7,6 @@ class MspdebugHead < Formula
   depends_on "libusb-compat" if OS.mac?
 #  depends_on "msp-ds"
 
-  patch do
-    url "https://raw.githubusercontent.com/tgtakaoka/homebrew-tinyos-msp430/master/patches/mspdebug-head-patches-1.tar.xz"
-    sha256 "ae6b6392eb78abf725611e3ec1623cf78c23558ea1864a7476333d64b3d2bff6"
-    apply "mspdebug-head-fix_lowercase_disasm.patch"
-    apply "mspdebug-head-chipinfo-slac460x.patch"
-  end
-  if OS.mac?
-    patch do 
-      url "https://raw.githubusercontent.com/tgtakaoka/homebrew-tinyos-msp430/master/patches/mspdebug-head-patches.tar.xz"
-      sha256 "ad8e16941df50104d3b2fd6ca5a775ce4066df32581ecb83314bf88e95e986d8"
-      apply "mspdebug-head-osx_brew.patch"
-      apply "mspdebug-head-osx_dylib-name.patch"
-    end
-  end
-
   def install
     ENV.append_to_cflags "-I#{Formula["hidapi"].opt_include}/hidapi" if OS.mac?
     ENV.append_to_cflags "-I/usr/include/hidapi" if OS.linux?
