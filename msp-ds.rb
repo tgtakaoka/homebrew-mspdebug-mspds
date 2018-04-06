@@ -2,8 +2,9 @@ class MspDs < Formula
   desc "MSP Debug Stack Open Source Package"
   homepage "http://www.ti.com/tool/mspds"
   url "http://www.ti.com/lit/sw/slac460x/slac460x.zip"
-  version "slac460x-2"
   sha256 "c6bf24338b50f6ce8f6f0127ec2673e10add251e0a89e894fd30897eaa4e0cbc"
+  version "slac460x"
+  revision 2
 
   depends_on "hidapi" if OS.mac?
   depends_on "libusb-compat" if OS.mac?
