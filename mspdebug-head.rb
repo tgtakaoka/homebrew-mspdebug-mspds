@@ -5,7 +5,7 @@ class MspdebugHead < Formula
 
   depends_on "hidapi" if OS.mac?
   depends_on "libusb-compat" if OS.mac?
-#  depends_on "msp-ds"
+  depends_on "msp-ds"
 
   def install
     ENV.append_to_cflags "-I#{Formula["hidapi"].opt_include}/hidapi" if OS.mac?
