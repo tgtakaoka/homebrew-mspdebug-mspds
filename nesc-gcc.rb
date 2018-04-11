@@ -17,7 +17,7 @@ class NescGcc < Formula
   depends_on "automake" => :build
   depends_on "autoconf" => :build
   depends_on :java => :build
-  depends_on "gcc" => :run if OS.mac?
+  depends_on "gcc" if OS.mac?
 
   def install
     # nesc is unable to build in parallel because multiple emacs instances
