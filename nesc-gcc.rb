@@ -14,8 +14,8 @@ class NescGcc < Formula
     sha256 "b26fe85550eb2925b07f16a28abb59a6fdeb5620cdbc97ac05e4a286212fb4eb"
   end
 
-  depends_on "automake" => :build
-  depends_on "autoconf" => :build
+  depends_on "automake" => :build if OS.mac?
+  depends_on "autoconf" => :build if OS.mac?
   depends_on :java => :build
   depends_on "gcc" if OS.mac?
 
