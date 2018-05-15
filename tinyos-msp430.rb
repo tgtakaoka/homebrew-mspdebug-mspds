@@ -3,7 +3,7 @@ class TinyosMsp430 < Formula
   homepage "http://github.com/tgtakaoka/tinyos-msp430"
   head "https://github.com/tgtakaoka/tinyos-msp430.git", :branch => "master", :shallow => false
 
-  depends_on "tinyos-main" => :head
+  depends_on "tinyos-prod" => :head
   depends_on "tinyos-tools" => :head
 
   def install

@@ -1,7 +1,7 @@
 class TinyosTools < Formula
   desc "Development tools for TinyOS"
   homepage "http://tinyos.net"
-  head "https://github.com/tgtakaoka/tinyos-main.git"
+  head "https://github.com/tp-freeforall/prod.git", :branch => "tp-master"
 
   patch do
     url "https://raw.githubusercontent.com/tgtakaoka/scripts-tinyos-msp430/master/tinyos-current_jdk.patch"

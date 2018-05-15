@@ -1,7 +1,7 @@
 class TinyosProd < Formula
   desc "TinyOS prod source"
   homepage "https://github.com/tp-freeforall/prod"
-  head "https://github.com/tgtakaoka/tinyos-prod.git", :branch => "tp-master", :shallow => false
+  head "https://github.com/tgtakaoka/tinyos-prod.git", :branch => "msp430-elf", :shallow => false
 
   def install
     dest = (prefix/"source")
