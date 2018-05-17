@@ -18,7 +18,7 @@ Version:
     tinyos-prod-HEAD (branch tp-master)
     tinyos-msp430-HEAD
     mspdebug-head-HEAD (chipinfo.db from slac460x)
-    msp-ds-slac460x_2 (with dumpdb)
+    msp-ds-slac460y_1 (with dumpdb)
 
 [Homebrew]: https://brew.sh/
 [TinyOS for small MSP430 chips]: https://github.com/tgtakaoka/tinyos-msp430

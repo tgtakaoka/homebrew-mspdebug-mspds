@@ -1,20 +1,20 @@
 class MspDs < Formula
   desc "MSP Debug Stack Open Source Package"
   homepage "http://www.ti.com/tool/mspds"
-  url "http://www.ti.com/lit/sw/slac460x/slac460x.zip"
-  sha256 "c6bf24338b50f6ce8f6f0127ec2673e10add251e0a89e894fd30897eaa4e0cbc"
-  version "slac460x"
-  revision 2
+  url "http://www.ti.com/lit/sw/slac460y/slac460y.zip"
+  sha256 "d3c5a50444d8d6ab9456fecf2a8ebbc9a391fa9447120d20aaa76c62bc5cc9b8"
+  version "slac460y"
+  revision 1
 
   depends_on "hidapi" if OS.mac?
   depends_on "libusb-compat" if OS.mac?
   depends_on "boost" if OS.mac?
 
   patch do
-    url "https://raw.githubusercontent.com/tgtakaoka/homebrew-tinyos-msp430/master/patches/msp-ds-slac460x-2-patches.tar.xz"
-    sha256 "601abcd99e3376953dd9cbf1d70c734dd2906ea6ade5d7888083f1e527e36803"
-    apply "msp-ds-slac460x-boost.patch"
-    apply "msp-ds-slac460x-dumpdb.patch"
+    url "https://raw.githubusercontent.com/tgtakaoka/homebrew-tinyos-msp430/master/patches/msp-ds-slac460y-1-patches.tar.xz"
+    sha256 "8946205f4d419fb421b16a7d16b5d27c427c879909f338a0fc547167f60f9ce2"
+    apply "msp-ds-slac460y-boost.patch"
+    apply "msp-ds-slac460y-dumpdb.patch"
   end
 
   def install
@@ -29,7 +29,6 @@ class MspDs < Formula
 
       suffix = ".so"
       hidapi_h = "/usr/include/hidapi/hidapi.h"
-      inreplace "Makefile", "-lusb-1.0", "-ludev"
     end
     if OS.mac?
       suffix = ".dylib"
