@@ -3,11 +3,6 @@ class TinyosTools < Formula
   homepage "http://tinyos.net"
   head "https://github.com/tp-freeforall/prod.git", :branch => "tp-master"
 
-  patch do
-    url "https://raw.githubusercontent.com/tgtakaoka/scripts-tinyos-msp430/master/tinyos-current_jdk.patch"
-    sha256 "d0b7b66a29eb78f0bea42cdcb4d5e9a4f8699a72a0e09d22248bce9f63a8bffc"
-  end
-
   depends_on "automake" => :build if OS.mac?
   depends_on "autoconf" => :build if OS.mac?
   depends_on :java => :build
