@@ -1,0 +1,15 @@
+diff --git a/src/nesc-compile b/src/nesc-compile
+index 6fdcb5a..e0c0d98 100755
+--- a/src/nesc-compile
++++ b/src/nesc-compile
+@@ -64,6 +64,10 @@ for ($i = 0; $i <= $#ARGV; $i++) {
+ 	    ($i, $file) = &nextarg($i);
+ 	    push @nesc_args, "-include", $file;
+ 	}
++	elsif (/^-isystem$/) {
++	    ($i, $file) = &nextarg($i);
++	    push @nesc_args, "-isystem", $file;
++	}
+ 	elsif (/^-S$/) {
+ 	    $asmonly = 1;
+ 	}

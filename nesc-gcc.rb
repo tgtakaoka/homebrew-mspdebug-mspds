@@ -8,6 +8,11 @@ class NescGcc < Formula
   depends_on :java => :build
   depends_on "gcc" if OS.mac?
 
+  patch do
+    url "https://raw.githubusercontent.com/tgtakaoka/homebrew-tinyos-msp430/master/patches/nesc-compile_isystem.patch"
+    sha256 "172b2f287f2b5da4c9dcd0de83ab677c42e1bd053c33be45681210384dc45e49"
+  end
+
   def install
     # nesc is unable to build in parallel because multiple emacs instances
     # lead to locking on the same file
