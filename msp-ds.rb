@@ -11,7 +11,7 @@ class MspDs < Formula
   depends_on "boost" if OS.mac?
 
   patch do
-    url "https://raw.githubusercontent.com/tgtakaoka/homebrew-tinyos-msp430/master/patches/msp-ds-3.15.0.1.patch"
+    url "https://raw.githubusercontent.com/tgtakaoka/homebrew-mspdebug-mspds/master/patches/msp-ds-3.15.0.1-dumpdb.patch"
     sha256 "da5d99a46b594a0fcbc1bdd1df454f094537d5b2a2415bf6f83b5a0f05201b83"
   end
 
