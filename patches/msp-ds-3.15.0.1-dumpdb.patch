@@ -1,0 +1,509 @@
+commit af6c57c8ad71111df6d8c733a89fc32b515ebdc2
+Author: Tadashi G. Takaoka <tadashi.g.takaoka@gmail.com>
+Date:   Mon Mar 16 22:24:03 2020 +0900
+
+    Add dumpdb
+
+diff --git a/DLL430_v3/src/TI/DLL430/DeviceDb/chipinfo.cpp b/DLL430_v3/src/TI/DLL430/DeviceDb/chipinfo.cpp
+new file mode 100644
+index 0000000..266b3f4
+--- /dev/null
++++ b/DLL430_v3/src/TI/DLL430/DeviceDb/chipinfo.cpp
+@@ -0,0 +1,399 @@
++#include <pch.h>
++#include <cstdio>
++
++#include "chipinfo.h"
++
++#include "../version.h"
++#include "DeviceInfo.h"
++
++using namespace TI::DLL430;
++using namespace DeviceDb;
++
++static void dump_id(FILE *out, const char *name, const IdCode& code)
++{
++    fprintf(out, "\t\t.%s\t\t= {\n", name);
++    fprintf(out, "\t\t\t.ver_id\t\t= 0x%04x,\n", code.version);
++    fprintf(out, "\t\t\t.ver_sub_id\t= 0x%04x,\n", code.subversion);
++    fprintf(out, "\t\t\t.revision\t= 0x%02x,\n", code.revision);
++    fprintf(out, "\t\t\t.fab\t\t= 0x%02x,\n", code.fab);
++    fprintf(out, "\t\t\t.self\t\t= 0x%04x,\n", code.self);
++    fprintf(out, "\t\t\t.config\t\t= 0x%02x,\n", code.config);
++    fprintf(out, "\t\t\t.fuses\t\t= 0x%02x,\n", code.fuses);
++    fprintf(out, "\t\t\t.activation_key\t= 0x%08x,\n", code.activationKey);
++    fprintf(out, "\t\t},\n");
++}
++
++void dump_eem(FILE *out, const DeviceInfo& dev)
++{
++#if 1
++	fprintf(out, "\t\t.eem\t\t= { /* no info */ },\n");
++#else
++	fprintf(out, "\t\t.eem\t\t= {\n");
++	fprintf(out, "\t\t\t.state_storage\t\t= 0x%02x,\n", eem.stateStorage_);
++	fprintf(out, "\t\t\t.cycle_counter\t\t= 0x%02x,\n", eem.cycleCounter_);
++	fprintf(out, "\t\t\t.cycle_counter_ops\t= 0x%02x,\n",
++	       eem.cycleCounterOperations_);
++	fprintf(out, "\t\t\t.trig_emulation_level\t= 0x%02x,\n",
++	       eem.trigger_.emulation_level_);
++	fprintf(out, "\t\t\t.trig_mem\t\t= 0x%02x,\n", eem.trigger_.mem_);
++	fprintf(out, "\t\t\t.trig_reg\t\t= 0x%02x,\n", eem.trigger_.reg_);
++	fprintf(out, "\t\t\t.trig_combinations\t= 0x%02x,\n",
++	       eem.trigger_.combinations_);
++	fprintf(out, "\t\t\t.trig_options\t\t= 0x%02x,\n",
++	       eem.trigger_.options_);
++	fprintf(out, "\t\t\t.trig_dma\t\t= 0x%02x,\n", eem.trigger_.dma_);
++	fprintf(out, "\t\t\t.trig_read_write\t= 0x%02x,\n",
++		eem.trigger_.readwrite_);
++	fprintf(out, "\t\t\t.trig_reg_ops\t\t= 0x%02x,\n",
++	       eem.trigger_.regOperations_);
++	fprintf(out, "\t\t\t.trig_comp_level\t= 0x%02x,\n",
++	       eem.trigger_.compLevel_);
++	fprintf(out, "\t\t\t.trig_mem_cond_level\t= 0x%02x,\n",
++	       eem.trigger_.mem_condLevel_);
++	fprintf(out, "\t\t\t.trig_mem_umask_level\t= 0x%02x,\n",
++	       eem.trigger_.mem_umaskLevel_);
++	fprintf(out, "\t\t\t.seq_states\t\t= 0x%02x,\n",
++	       eem.sequencer_.states_);
++	fprintf(out, "\t\t\t.seq_start\t\t= 0x%02x,\n",
++	       eem.sequencer_.start_);
++	fprintf(out, "\t\t\t.seq_end\t\t= 0x%02x,\n",
++	       eem.sequencer_.end_);
++	fprintf(out, "\t\t\t.seq_reset\t\t= 0x%02x,\n",
++	       eem.sequencer_.reset_);
++	fprintf(out, "\t\t\t.seq_blocked\t\t= 0x%02x,\n",
++	       eem.sequencer_.blocked_);
++	fprintf(out, "\t\t},\n");
++#endif
++}
++
++static void dump_voltage(FILE *out, const VoltageInfo& voltage)
++{
++    fprintf(out, "\t\t.voltage\t= {\n");
++    fprintf(out, "\t\t\t.vcc_min\t= %d,\n", voltage.vccMin);
++    fprintf(out, "\t\t\t.vcc_max\t= %d,\n", voltage.vccMax);
++    fprintf(out, "\t\t\t.vcc_flash_min\t= %d,\n", voltage.vccFlashMin);
++    fprintf(out, "\t\t\t.vcc_secure_min\t= %d,\n", voltage.vccSecureMin);
++    fprintf(out, "\t\t\t.vpp_secure_min\t= %d,\n", voltage.vppSecureMin);
++    fprintf(out, "\t\t\t.vpp_secure_max\t= %d,\n", voltage.vppSecureMax);
++    fprintf(out, "\t\t\t.has_test_vpp\t= %d,\n", voltage.testVpp);
++    fprintf(out, "\t\t},\n");
++}
++
++static void dtimer(FILE *out, int index, const ClockPair& p)
++{
++    if (!p.name.size())
++        fprintf(out, "\t\t\t{0},\n");
++    else
++        fprintf(out, "\t\t\t{\"%s\", 0x%02x},\n",
++               p.name.c_str(), p.value);
++}
++
++#if 0
++static void dname(FILE *out, const ClockNames& n)
++{
++    if (!n.size())
++        return;
++
++    fprintf(out, "\t\t\t\"%s\",\n", n.c_str());
++}
++#endif
++
++static void dump_clocks(FILE *out, const ClockInfo& clocks)
++{
++    const auto& t = clocks.eemTimers;
++    const auto& n = clocks.eemClocks;
++
++    fprintf(out, "\t\t.clock_control\t= 0x%02x,\n", clocks.clockControl);
++    fprintf(out, "\t\t.mclk_control\t= 0x%08x,\n", clocks.mclkCntrl0);
++
++    fprintf(out, "\t\t.clock_map\t= {\n");
++    for (int i = 0; i < t.size(); i++) {
++        dtimer(out, i, t[i]);
++    }
++    fprintf(out, "\t\t},\n");
++
++#if 0
++    fprintf(out, "\t\t.names\t\t= {\n");
++    for (int i = 0; i < n.size(); i++) {
++        dname(out, n[i]);
++    }
++    fprintf(out, "\t\t},\n");
++#endif
++}
++
++static void dump_functions(FILE *out, const FunctionMapping& m)
++{
++    fprintf(out, "\t\t.v3_functions\t= {\n");
++    for (const auto& entry : m) {
++        fprintf(out, "\t\t\t[0x%02x]\t= 0x%02x,\n", entry.first, entry.second);
++    }
++    fprintf(out, "\t\t},\n");
++}
++
++static void dump_funclet_code(FILE *out,
++                              const char *name, const FuncletCode& code)
++{
++    const uint16_t *data = code.code();
++    const size_t len = code.codeSize() >> 1;
++    size_t i = 0;
++
++    fprintf(out, "static const struct chipinfo_funclet %s = {\n", name);
++    fprintf(out, "\t.code_size\t= %d,\n", len);
++    fprintf(out, "\t.max_payload\t= %d,\n", code.maxPayloadSize());
++    fprintf(out, "\t.entry_point\t= 0x%04x,\n", code.programStartOffset());
++    fprintf(out, "\t.code\t\t= {\n");
++
++    while (i < len) {
++        size_t r = 4;
++
++        if (i + r > len)
++            r = len - i;
++
++        fprintf(out, "\t\t");
++        for (size_t j = 0; j < r; j++) {
++            const uint16_t w = data[i + j];
++
++            if (j)
++                fprintf(out, " ");
++
++            fprintf(out, "0x%04x,", w);
++        }
++        fprintf(out, "\n");
++
++        i += r;
++    }
++
++    fprintf(out, "\t}\n");
++    fprintf(out, "};\n\n");
++}
++
++static void dump_funclet(FILE *out,
++                         const std::map<FuncletCode, std::string> funclets,
++                         const FuncletMapping& fmap,
++                         FuncletCode::Type type, const char *name)
++{
++    const auto i = fmap.find(type);
++    if (i == fmap.end())
++        return;
++    if (i->second == FuncletCode())
++        return;
++
++    const auto j = funclets.find(i->second);
++    if (j == funclets.end()) {
++        fprintf(stderr, "UNKNOWN FUNCLET\n");
++        dump_funclet_code(stderr, "UNKNOWN", i->second);
++        return;
++    }
++
++    fprintf(out, "\t\t.v3_%s\t= &%s,\n", name, j->second.c_str());
++}
++
++static void dump_features(FILE *out, const DeviceInfo& dev)
++{
++    const Features& f = dev.features;
++    const ExtendedFeatures& e = dev.extFeatures;
++    fprintf(out, "\t\t.clock_sys\t= CHIPINFO_CLOCK_SYS_");
++    switch (f.clockSystem) {
++    case ClockSystemType::BC_1xx: fprintf(out, "BC_1XX"); break;
++    case ClockSystemType::BC_2xx: fprintf(out, "BC_2XX"); break;
++    case ClockSystemType::FLLPLUS: fprintf(out, "FLL_PLUS"); break;
++    case ClockSystemType::MOD_OSC: fprintf(out, "MOD_OSC"); break;
++    }
++    fprintf(out, ",\n");
++
++    fprintf(out, "\t\t.features\t= 0");
++
++    if (f.i2c)
++        fprintf(out, "\n\t\t\t| CHIPINFO_FEATURE_I2C");
++    if (f.lcfe)
++        fprintf(out, "\n\t\t\t| CHIPINFO_FEATURE_LCFE");
++    if (f.quickMemRead)
++        fprintf(out, "\n\t\t\t| CHIPINFO_FEATURE_QUICK_MEM_READ");
++    if (f.stopFllDbg)
++        fprintf(out, "\n\t\t\t| CHIPINFO_FEATURE_SFLLDH");
++    if (f.hasFram)
++        fprintf(out, "\n\t\t\t| CHIPINFO_FEATURE_FRAM");
++    bool hasBsl = false;
++    for (const auto& entry : dev.memoryLayout) {
++        if (entry.first.find("Bsl") != std::string::npos) {
++            hasBsl = true;
++            break;
++        }
++    }
++    if (!hasBsl)
++        fprintf(out, "\n\t\t\t| CHIPINFO_FEATURE_NO_BSL");
++
++    if (e.tmr)
++        fprintf(out, "\n\t\t\t| CHIPINFO_FEATURE_TMR");
++    if (e.jtag)
++        fprintf(out, "\n\t\t\t| CHIPINFO_FEATURE_JTAG");
++    if (e.dtc)
++        fprintf(out, "\n\t\t\t| CHIPINFO_FEATURE_DTC");
++    if (e.sync)
++        fprintf(out, "\n\t\t\t| CHIPINFO_FEATURE_SYNC");
++    if (e.instr)
++        fprintf(out, "\n\t\t\t| CHIPINFO_FEATURE_INSTR");
++    if (e._1377)
++        fprintf(out, "\n\t\t\t| CHIPINFO_FEATURE_1337");
++    if (e.psach)
++        fprintf(out, "\n\t\t\t| CHIPINFO_FEATURE_PSACH");
++
++    fprintf(out, ",\n");
++}
++
++static void dump_power(FILE *out, const PowerSettings& p)
++{
++    fprintf(out, "\t\t.power\t\t= {\n");
++    fprintf(out, "\t\t\t.reg_mask\t\t= 0x%05x,\n", p.testRegMask);
++    fprintf(out, "\t\t\t.enable_lpm5\t\t= 0x%05x,\n", p.testRegEnableLpm5);
++    fprintf(out, "\t\t\t.disable_lpm5\t\t= 0x%05x,\n", p.testRegDisableLpm5);
++    fprintf(out, "\t\t\t.reg_mask_3v\t\t= 0x%05x,\n", p.testReg3VMask);
++    fprintf(out, "\t\t\t.enable_lpm5_3v\t\t= 0x%05x,\n", p.testReg3VEnableLpm5);
++    fprintf(out, "\t\t\t.disable_lpm5_3v\t= 0x%05x,\n", p.testReg3VDisableLpm5);
++    fprintf(out, "\t\t},\n");
++}
++
++static void dump_memory(FILE *out, const DeviceInfo& dev)
++{
++    std::map<uint32_t, std::pair<std::string, MemoryInfo>, std::greater<uint32_t>> addressMap;
++    for (const auto& entry : dev.memoryLayout) {
++        addressMap[entry.second.start] = entry;
++    }
++    fprintf(out, "\t\t.memory\t\t= {\n");
++    for (const auto& entry : addressMap) {
++        const MemoryInfo mem = entry.second.second;
++
++        fprintf(out, "\t\t\t{\n");
++        fprintf(out, "\t\t\t\t.name\t\t= \"%s\",\n", entry.second.first.c_str());
++        fprintf(out, "\t\t\t\t.type\t\t= CHIPINFO_MEMTYPE_");
++        switch(mem.type) {
++        case MemoryType::Flash: fprintf(out, "FLASH"); break;
++        case MemoryType::Rom: fprintf(out, "ROM"); break;
++        case MemoryType::Ram: fprintf(out, "RAM"); break;
++        case MemoryType::Register: fprintf(out, "REGISTER"); break;
++        }
++        fprintf(out, ",\n");
++
++        fprintf(out, "\t\t\t\t.bits\t\t= %d,\n", mem.bits);
++        fprintf(out, "\t\t\t\t.mapped\t\t= %d,\n", mem.mapped ? 1 : 0);
++        fprintf(out, "\t\t\t\t.size\t\t= %d,\n", mem.size);
++        fprintf(out, "\t\t\t\t.offset\t\t= 0x%05x,\n", mem.start);
++        fprintf(out, "\t\t\t\t.seg_size\t= %d,\n", mem.segmentSize);
++        fprintf(out, "\t\t\t\t.bank_size\t= 0 /* no info */,\n");
++        fprintf(out, "\t\t\t\t.banks\t\t= %d,\n", mem.banks);
++        fprintf(out, "\t\t\t},\n");
++    }
++    fprintf(out, "\t\t\t{0}\n");
++    fprintf(out, "\t\t},\n");
++}
++
++
++void DeviceDb::exportChipInfo(const DeviceMap& deviceMap, const char *filename) {
++    std::map<FuncletCode, std::string> funclets;
++    funclets[FuncletCode(eraseFuncletCodeDCO, sizeof(eraseFuncletCodeDCO), 4)] = "erase_dco";
++    funclets[FuncletCode(eraseFuncletCodeXDCO, sizeof(eraseFuncletCodeXDCO), 4)] = "erase_xdco";
++    funclets[FuncletCode(eraseFuncletCodeXv2, sizeof(eraseFuncletCodeXv2))] = "erase_xv2";
++    funclets[FuncletCode(eraseFuncletCodeXv2FRAM, sizeof(eraseFuncletCodeXv2FRAM))] = "erase_xv2_fram";
++    funclets[FuncletCode(eraseFuncletCodeFLL, sizeof(eraseFuncletCodeFLL), 4)] = "erase_fll";
++    funclets[FuncletCode(eraseFuncletCodeXFLL, sizeof(eraseFuncletCodeXFLL), 4)] = "erase_xfll";
++    funclets[FuncletCode(eraseFuncletCodeXv2FR41xx, sizeof(eraseFuncletCodeXv2FR41xx))] = "erase_xv2_fr41xx";
++    funclets[FuncletCode(writeFuncletCodeDCO, sizeof(writeFuncletCodeDCO), 128)] = "write_dco";
++    funclets[FuncletCode(writeFuncletCodeXDCO, sizeof(writeFuncletCodeXDCO), 256)] = "write_xdco";
++    funclets[FuncletCode(writeFuncletCodeXv2, sizeof(writeFuncletCodeXv2))] = "write_xv2";
++    funclets[FuncletCode(writeFuncletCodeXv2WordMode, sizeof(writeFuncletCodeXv2WordMode))] = "write_xv2_word";
++    funclets[FuncletCode(writeFuncletCodeXv2FRAM, sizeof(writeFuncletCodeXv2FRAM))] = "write_xv2_fram";
++    funclets[FuncletCode(writeFuncletCode430I, sizeof(writeFuncletCode430I), 128)] = "write_430i";
++    funclets[FuncletCode(writeFuncletCodeFLL, sizeof(writeFuncletCodeFLL), 128)] = "write_fll";
++    funclets[FuncletCode(writeFuncletCodeXFLL, sizeof(writeFuncletCodeXFLL), 256)] = "write_xfll";
++    funclets[FuncletCode(UnlockBslFuncletCodeXv2, sizeof(UnlockBslFuncletCodeXv2))] = "bsl_unlock_xv2";
++
++    FILE *out = fopen(filename, "w");
++    if (out == nullptr) {
++        fprintf(stderr, "Can out dump to file %s\n", filename);
++        return;
++    }
++
++    fprintf(out,
++        "/* MSP430 chip database\n"
++        " *\n"
++        " * THIS FILE WAS GENERATED FROM MSP430.DLL v%d.%d.%d.%d\n"
++        " *\n"
++        " * Copyright (C) 2011 - 2018 Texas Instruments Incorporated - http://www.ti.com/\n"
++        " *\n"
++        " *  Redistribution and use in source and binary forms, with or without\n"
++        " *  modification, are permitted provided that the following conditions\n"
++        " *  are met:\n"
++        " *\n"
++        " *    Redistributions of source code must retain the above copyright\n"
++        " *    notice, this list of conditions and the following disclaimer.\n"
++        " *\n"
++        " *    Redistributions in binary form must reproduce the above copyright\n"
++        " *    notice, this list of conditions and the following disclaimer in the\n"
++        " *    documentation and/or other materials provided with the\n"
++        " *    distribution.\n"
++        " *\n"
++        " *    Neither the name of Texas Instruments Incorporated nor the names of\n"
++        " *    its contributors may be used to endorse or promote products derived\n"
++        " *    from this software without specific prior written permission.\n"
++        " *\n"
++        " *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS\n"
++        " *  \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT\n"
++        " *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR\n"
++        " *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT\n"
++        " *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,\n"
++        " *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT\n"
++        " *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,\n"
++        " *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\n"
++        " *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT\n"
++        " *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE\n"
++        " *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\n"
++        " */\n\n", VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_BUILD);
++
++    fprintf(out, "#define CI_DLL430_VERSION_MAJOR %d\n", VERSION_MAJOR);
++    fprintf(out, "#define CI_DLL430_VERSION_MINOR %d\n", VERSION_MINOR);
++    fprintf(out, "#define CI_DLL430_VERSION_PATCH %d\n", VERSION_PATCH);
++    fprintf(out, "#define CI_DLL430_VERSION_BUILD %d\n", VERSION_BUILD);
++    fprintf(out, "#define CI_DLL430_VERSION_STRING \"%d.%d.%d.%d\"\n\n",
++           VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_BUILD);
++
++    for (const auto& entry : funclets) {
++        dump_funclet_code(out, entry.second.c_str(), entry.first);
++    }
++
++    fprintf(out, "const struct chipinfo chipinfo_db[] = {");
++    for (const auto& entry : deviceMap) {
++        const auto& device = entry.second;
++        if (device.bits == 32 && device.description.find("MSP432") != std::string::npos) {
++            // Skip since this is MSP432 device.
++            continue;
++        }
++        fprintf(out, "\t{\n");
++        fprintf(out, "\t\t.name\t\t= \"%s\",\n", device.description.c_str());
++        fprintf(out, "\t\t.bits\t\t= %d,\n", device.bits);
++        fprintf(out, "\t\t.psa\t\t= CHIPINFO_PSA_%s,\n",
++               (device.psa == PsaType::Enhanced ? "ENHANCED" : "REGULAR"));
++
++        dump_clocks(out, device.clockInfo);
++        dump_id(out, "id", device.idCode);
++        dump_id(out, "id_mask", device.idMask);
++        dump_eem(out, device);
++        dump_voltage(out, device.voltageInfo);
++        dump_functions(out, device.functionMap);
++        dump_funclet(out, funclets, device.funcletMap,
++                     FuncletCode::ERASE, "erase");
++        dump_funclet(out, funclets, device.funcletMap,
++                     FuncletCode::WRITE, "write");
++        dump_funclet(out, funclets, device.funcletMap,
++                     FuncletCode::BSLUNLOCK, "unlock");
++        dump_features(out, device);
++        dump_power(out, device.powerSettings);
++        dump_memory(out, device);
++
++        fprintf(out, "\t},\n\n");
++    }
++
++    /* Terminator */
++    fprintf(out, "\t{0}\n");
++    fprintf(out, "};\n");
++    fclose(out);
++}
+diff --git a/DLL430_v3/src/TI/DLL430/DeviceDb/chipinfo.h b/DLL430_v3/src/TI/DLL430/DeviceDb/chipinfo.h
+new file mode 100644
+index 0000000..3d6769d
+--- /dev/null
++++ b/DLL430_v3/src/TI/DLL430/DeviceDb/chipinfo.h
+@@ -0,0 +1,13 @@
++#pragma once
++
++#include "Database.h"
++
++namespace TI {
++namespace DLL430 {
++namespace DeviceDb {
++
++void exportChipInfo(const DeviceMap& deviceMap, const char *filename);
++
++} //  namespace DeviceDb
++} //  namespace DLL430
++} //  namespace TI
+diff --git a/DLL430_v3/src/TI/DLL430/FuncletCode.h b/DLL430_v3/src/TI/DLL430/FuncletCode.h
+index f7fd426..7166bbc 100644
+--- a/DLL430_v3/src/TI/DLL430/FuncletCode.h
++++ b/DLL430_v3/src/TI/DLL430/FuncletCode.h
+@@ -67,6 +67,17 @@ public:
+ 				(memcmp(code_, b.code_, codeSize_) == 0);
+ 	}
+ 
++	bool operator<(const FuncletCode& b) const
++	{
++		if (codeSize_ != b.codeSize_) {
++			return codeSize_ < b.codeSize_;
++		}
++		if (maxPayload_ != b.maxPayload_) {
++			return maxPayload_ < b.maxPayload_;
++		}
++		return memcmp(code_, b.code_, codeSize_) < 0;
++	}
++
+ private:
+ 	const uint16_t *code_;
+ 	size_t codeSize_;
+diff --git a/Makefile b/Makefile
+index a4cfbed..f17c0e2 100644
+--- a/Makefile
++++ b/Makefile
+@@ -136,6 +136,9 @@ $(PCH_COMPILED): $(PCH_HEADER)
+ $(BSLLIB):
+ 	$(MAKE) -C ./ThirdParty/BSL430_DLL
+ 
++msp-ds-dumpdb: msp-ds-dumpdb.o all
++	$(CXX) -o $@ $< $(STATICOUTPUT).a -lboost_system -lboost_thread -lboost_chrono -lpthread
++
+ install:
+ 	cp $(OUTPUT) /usr/local/lib/
+ 
+diff --git a/msp-ds-dumpdb.cpp b/msp-ds-dumpdb.cpp
+new file mode 100644
+index 0000000..604d409
+--- /dev/null
++++ b/msp-ds-dumpdb.cpp
+@@ -0,0 +1,37 @@
++#include <cstdio>
++
++#include "DeviceInfo.h"
++#include "DeviceDb/Database.h"
++#include "DeviceDb/chipinfo.h"
++#include "DeviceDb/exportxml.h"
++
++using namespace TI::DLL430;
++
++int main(int argc, char **argv) {
++
++	if (argc < 2) {
++		fprintf(stderr,
++"usage: %s <filename.(xml|db)>\n"
++"  if .xml is specified, dump XML file exactly MSP430_DumpDeviceDb do.\n"
++"  if .db is specified, dump file as chipinfo.db format of mspdebug.\n",
++			argv[0]);
++		return 1;
++	}
++	const char *filename = argv[1];
++
++	DeviceDb::Database db;
++	db.loadDevices("", false /* usefile */);
++	const DeviceMap& deviceMap = DeviceDb::Database::instance();
++
++	const char *ext = strrchr(filename, '.');
++	if (ext != nullptr && strcmp(ext, ".xml") == 0) {
++		DeviceDb::exportXml(deviceMap, filename);
++		return 0;
++	}
++	if (ext != nullptr && strcmp(ext, ".db") == 0) {
++		DeviceDb::exportChipInfo(deviceMap, filename);
++		return 0;
++	}
++	fprintf(stderr, "Unknown file format. Should be .xml or .db\n");
++	return 1;
++}

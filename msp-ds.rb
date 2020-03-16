@@ -1,9 +1,9 @@
 class MspDs < Formula
   desc "MSP Debug Stack Open Source Package"
-  homepage "http://www.ti.com/tool/mspds"
-  url "http://www.ti.com/lit/sw/slac460y/slac460y.zip"
-  sha256 "d3c5a50444d8d6ab9456fecf2a8ebbc9a391fa9447120d20aaa76c62bc5cc9b8"
-  version "slac460y"
+  homepage "https://www.ti.com/tool/download/MSPDS-OPEN-SOURCE"
+  url "http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSPDS/3_15_0_000/export/MSPDebugStack_OS_Package_3_15_0_1.zip"
+  sha256 "31f8f66ce9f9156bcb550adf3937ebf44ad7995bef2517f2b09e408be947c4c5"
+  version "3.15.0.1"
   revision 1
 
   depends_on "hidapi" if OS.mac?
@@ -11,24 +11,20 @@ class MspDs < Formula
   depends_on "boost" if OS.mac?
 
   patch do
-    url "https://raw.githubusercontent.com/tgtakaoka/homebrew-tinyos-msp430/master/patches/msp-ds-slac460y-1-patches.tar.xz"
-    sha256 "8946205f4d419fb421b16a7d16b5d27c427c879909f338a0fc547167f60f9ce2"
-    apply "msp-ds-slac460y-boost.patch"
-    apply "msp-ds-slac460y-dumpdb.patch"
+    url "https://raw.githubusercontent.com/tgtakaoka/homebrew-tinyos-msp430/master/patches/msp-ds-3.15.0.1.patch"
+    sha256 "da5d99a46b594a0fcbc1bdd1df454f094537d5b2a2415bf6f83b5a0f05201b83"
   end
 
   def install
     args = []
     if OS.linux?
-      # Make hid-libusb.o
-      linux_dir = "ThirdParty/hidapi-hidapi-0.8.0-rc1/linux"
-      Dir.chdir linux_dir do
-        system "make", "-f", "Makefile-manual", "hid.o"
-        FileUtils.cp "hid.o", buildpath/"ThirdParty/lib64/hid-libusb.o"
+      Dir.chdir (buildpath/"ThirdParty/lib64") do
+        libusb_a = Dir.glob("/usr/lib/**/libhidapi-libusb.a")[0]
+        system "ar", "x", libusb_a
+        (buildpath/"ThirdParty/lib64").install_symlink "hid.o" => "hid-libusb.o"
       end
-
       suffix = ".so"
-      hidapi_h = "/usr/include/hidapi/hidapi.h"
+      hidapi_h = Dir.glob("/usr/include/**/hidapi.h")[0]
     end
     if OS.mac?
       suffix = ".dylib"
