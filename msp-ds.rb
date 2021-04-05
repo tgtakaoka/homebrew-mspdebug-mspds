@@ -1,7 +1,7 @@
 class MspDs < Formula
   desc "MSP Debug Stack Open Source Package"
   homepage "https://www.ti.com/tool/download/MSPDS-OPEN-SOURCE"
-  url "http://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSPDS/3_15_1_001/export/MSPDebugStack_OS_Package_3_15_1_1.zip"
+  url "https://software-dl.ti.com/msp430/msp430_public_sw/mcu/msp430/MSPDS/3_15_1_001/export/MSPDebugStack_OS_Package_3_15_1_1.zip"
   sha256 "e3a59a98c43de7a92e5814d8c3304026165e6d2551e60acaca1f08c6b1a4bac8"
   version "3.15.1.1"
   revision 1
